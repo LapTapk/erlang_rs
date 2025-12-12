@@ -1,5 +1,7 @@
-Erlang External Term Format for Rust
+Erlang External Term Format for Rust Fork
 ====================================
+
+This fork is made for `https://github.com/LapTapk/rled`.
 
 [![Build Status](https://app.travis-ci.com/okeuday/erlang_rs.svg?branch=master)](https://app.travis-ci.com/okeuday/erlang_rs)
 
