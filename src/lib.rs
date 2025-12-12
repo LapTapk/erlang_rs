@@ -145,6 +145,7 @@ pub enum OtpErlangTerm {
     OtpErlangPort(Port),
     OtpErlangReference(Reference),
     OtpErlangFunction(Function),
+    Unparsed
 }
 
 /// Error description
@@ -409,9 +410,15 @@ fn binary_to_term_(i: &mut usize, data: &[u8]) -> Result<OtpErlangTerm> {
             *i += j;
             Ok(OtpErlangTerm::OtpErlangBinary(binary.to_vec()))
         },
-        TAG_SMALL_BIG_EXT |
+        TAG_SMALL_BIG_EXT => {
+            let length = slice_get(data, *i)?.clone() as usize;
+            *i += 2 + length;
+            Ok(OtpErlangTerm::Unparsed)
+        },
         TAG_LARGE_BIG_EXT => {
-            Err(ErrorKind::ParseError("rust doesn't provide bigint").into())
+            let length = unpack_u32(i, data)? as usize;
+            *i += 1 + length;
+            Ok(OtpErlangTerm::Unparsed)
         },
         TAG_NEW_FUN_EXT => {
             let length = unpack_u32(i, data)? as usize;
@@ -662,6 +669,9 @@ fn term_to_binary_(term: &OtpErlangTerm,
         OtpErlangTerm::OtpErlangFunction(value) => {
             function_to_binary(value, data)
         },
+        OtpErlangTerm::Unparsed => {
+            Ok(())
+        }
     }
 }
 
